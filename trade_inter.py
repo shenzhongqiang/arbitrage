@@ -14,7 +14,7 @@ def find_max_profit_range(contracts, start, end):
         profit = contracts[mid]['price'] - (
             alpha * contracts[start]['price'] +
             (1 - alpha) * contracts[end]['price'])
-        if profit > maxp:
+        if cmp_float(profit, maxp) > 0:
             maxp = profit
             max_mid = mid
     return (max_mid, maxp)
@@ -25,7 +25,7 @@ def find_max_profit(contracts, start):
     max_end = 0
     for end in xrange(start + 2, len(contracts)):
         [mid, profit] = find_max_profit_range(contracts, start, end)
-        if profit > maxp:
+        if cmp_float(profit, maxp) > 0:
             maxp = profit
             max_mid = mid
             max_end = end
@@ -55,20 +55,20 @@ for exp_date in options.keys():
     maxp = 0
     for i in xrange(len(contracts) - 2):
         [mid, end, profit] = find_max_profit(contracts, i)
-        if profit > maxp:
+        if cmp_float(profit, maxp) > 0:
             max_start = i
             max_mid = mid
             max_end = end
             maxp = profit
 
-
-    print "%s(%f) %s(%f) <=> %s(%f) %f" % (
-        contracts[max_start]['code'],
-        contracts[max_start]['price'],
-        contracts[max_end]['code'],
-        contracts[max_end]['price'],
-        contracts[max_mid]['code'],
-        contracts[max_mid]['price'],
-        maxp)
+    if maxp > 0:
+        print "%s(%f) %s(%f) <=> %s(%f) %f" % (
+            contracts[max_start]['code'],
+            contracts[max_start]['price'],
+            contracts[max_end]['code'],
+            contracts[max_end]['price'],
+            contracts[max_mid]['code'],
+            contracts[max_mid]['price'],
+            maxp)
 
 

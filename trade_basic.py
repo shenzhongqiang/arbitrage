@@ -1,15 +1,7 @@
 import argparse
 import os.path
 import sys
-
-# compare two float numbers
-def cmp_float(f1, f2):
-    if f1 - f2 < -10**-10:
-        return -1
-    elif f1 - f2 > 10**-10:
-        return 1
-    else:
-        return 0
+from utils import *
 
 # parse CLI options
 parser = argparse.ArgumentParser(

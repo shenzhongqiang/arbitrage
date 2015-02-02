@@ -37,7 +37,7 @@ def get_options(op_symbol, op_type):
         exp_date = data[7]
         code = data[1]
         strike = float(data[5])
-        price = float(data[11])
+        price = float(data[13])
 
         if not exp_date in options:
             options[exp_date] = []

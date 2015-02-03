@@ -1,5 +1,6 @@
 import argparse
 import sys
+import timeit
 from utils import *
 
 def get_slope(contracts, i1, i2):
@@ -30,6 +31,59 @@ def find_max_profit(contracts, mid):
 
     return (best_left_i, best_right_i)
 
+def trade(contracts, debug=False):
+    for exp_date in options.keys():
+        if debug == True:
+            print "================ exp %s ==================" % (exp_date)
+
+        # sort options by acending strike price
+        contracts = options[exp_date]
+        contracts.sort(key=lambda x: x['strike'])
+
+        # find arbitrage opportunity
+        best_start = 0
+        best_mid = 0
+        best_end = 0
+        maxp = 0
+        for i in xrange(len(contracts) - 2):
+            strike1 = contracts[i]['strike']
+            strike2 = contracts[i+1]['strike']
+            strike3 = contracts[i+2]['strike']
+            price1 = contracts[i]['price']
+            price2 = contracts[i+1]['price']
+            price3 = contracts[i+2]['price']
+            if cmp_float(strike1 + strike3, strike2 * 2) == 0\
+                and cmp_float(price1 + price3, price2 * 2) == -1:
+                mid = i + 1
+                [start, end] = find_max_profit(contracts, mid)
+                dist_left = mid - start
+                dist_right = end - mid
+                alpha = float(dist_right) / float(dist_left + dist_right)
+                profit = contracts[mid]['price'] - (
+                    alpha * contracts[start]['price'] +
+                    (1 - alpha) * contracts[end]['price'])
+                if profit > maxp:
+                    maxp = profit
+                    best_start = start
+                    best_end = end
+                    best_mid = mid
+
+
+        if debug == True:
+            print "%s(%f) %s(%f) <=> %s(%f) %f" % (
+                contracts[best_start]['code'],
+                contracts[best_start]['price'],
+                contracts[best_end]['code'],
+                contracts[best_end]['price'],
+                contracts[best_mid]['code'],
+                contracts[best_mid]['price'],
+                maxp)
+
+def wrapper(func, *args, **kwargs):
+    def wrapped():
+        return func(*args, **kwargs)
+    return wrapped
+
 # parse CLI options
 parser = argparse.ArgumentParser(
     description="Find option arbitrage opportunities")
@@ -37,52 +91,11 @@ parser.add_argument(
     '--symbol', help='equity symbol', required=True)
 parser.add_argument(
     '--type', help='option type: [call|put]', required=True)
+parser.add_argument(
+    '--debug', help='turn on debug mode', action='store_true')
 args = parser.parse_args()
 
 options = get_options(args.symbol, args.type)
-
-for exp_date in options.keys():
-    print "================ exp %s ==================" % (exp_date)
-    # sort options by acending strike price
-    contracts = options[exp_date]
-    contracts.sort(key=lambda x: x['strike'])
-
-    # find arbitrage opportunity
-    best_start = 0
-    best_mid = 0
-    best_end = 0
-    maxp = 0
-    for i in xrange(len(contracts) - 2):
-        strike1 = contracts[i]['strike']
-        strike2 = contracts[i+1]['strike']
-        strike3 = contracts[i+2]['strike']
-        price1 = contracts[i]['price']
-        price2 = contracts[i+1]['price']
-        price3 = contracts[i+2]['price']
-        if cmp_float(strike1 + strike3, strike2 * 2) == 0\
-            and cmp_float(price1 + price3, price2 * 2) == -1:
-            mid = i + 1
-            [start, end] = find_max_profit(contracts, mid)
-            dist_left = mid - start
-            dist_right = end - mid
-            alpha = float(dist_right) / float(dist_left + dist_right)
-            profit = contracts[mid]['price'] - (
-                alpha * contracts[start]['price'] +
-                (1 - alpha) * contracts[end]['price'])
-            if profit > maxp:
-                maxp = profit
-                best_start = start
-                best_end = end
-                best_mid = mid
-
-
-    print "%s(%f) %s(%f) <=> %s(%f) %f" % (
-        contracts[best_start]['code'],
-        contracts[best_start]['price'],
-        contracts[best_end]['code'],
-        contracts[best_end]['price'],
-        contracts[best_mid]['code'],
-        contracts[best_mid]['price'],
-        maxp)
-
-
+wrapped = wrapper(trade, options, debug=args.debug)
+elapsed = timeit.Timer(wrapped).timeit(number=10000)
+print "elapsed: %f" % (elapsed)

@@ -31,7 +31,7 @@ def find_max_profit(contracts, mid):
 
     return (best_left_i, best_right_i)
 
-def trade(contracts, debug=False):
+def trade(options, debug=False):
     for exp_date in options.keys():
         if debug == True:
             print "================ exp %s ==================" % (exp_date)

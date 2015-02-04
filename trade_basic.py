@@ -42,6 +42,8 @@ def wrapper(func, *args, **kwargs):
 parser = argparse.ArgumentParser(
     description="Find option arbitrage opportunities")
 parser.add_argument(
+    '--date', help='trading date', required=True)
+parser.add_argument(
     '--symbol', help='equity symbol', required=True)
 parser.add_argument(
     '--type', help='option type: [call|put]', required=True)
@@ -49,7 +51,7 @@ parser.add_argument(
     '--debug', help='turn on debug mode', action='store_true')
 args = parser.parse_args()
 
-options = get_options(args.symbol, args.type)
+options = get_options(args.date, args.symbol, args.type)
 wrapped = wrapper(trade, options, debug=args.debug)
 elapsed = timeit.Timer(wrapped).timeit(number=10000)
 print "elapsed: %f" % (elapsed)

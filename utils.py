@@ -11,12 +11,12 @@ def cmp_float(f1, f2):
         return 0
 
 # read data from file and return dictionay
-def get_options(op_symbol, op_type):
+def get_options(op_date, op_symbol, op_type):
     # generate filename from CLI options
     ROOT_DIR = os.path.dirname(
         os.path.realpath(__file__))
     filename = "%s.%s" % (op_symbol, op_type)
-    filepath = os.path.join(ROOT_DIR, 'data', filename)
+    filepath = os.path.join(ROOT_DIR, 'data', op_date, filename)
 
     # if file does not exist, error
     if not os.path.isfile(filepath):
